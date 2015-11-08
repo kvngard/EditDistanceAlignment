@@ -11,7 +11,6 @@ namespace GeneticsLab
         /// <summary>
         /// Align only 5000 characters in each sequence.
         /// </summary>
-        private int MaxCharactersToAlign = 5000;
         private int SubstitutionCost = 1;
         private int InsertDeleteCost = 5;
         private int CharsMatchCost = -3;
@@ -28,37 +27,26 @@ namespace GeneticsLab
         /// of the ResultTable</returns>
         public int Align(GeneSequence sequenceA, GeneSequence sequenceB, ResultTable resultTableSoFar, int rowInTable, int columnInTable)
         {
-            dpTable table = new dpTable(sequenceA, sequenceB);
+            dpRows table = new dpRows(sequenceA, sequenceB);
 
-            for (int i = 1; i < table.width && i < MaxCharactersToAlign; i++)
+            for (int i = 1; i < table.height; i++)
             {
-                for (int j = 1; j < table.height && j < MaxCharactersToAlign; j++)
+                for (int j = 1; j < table.width; j++)
                 {
-                    double topCell = table.GetCellValue(i, j - 1) + InsertDeleteCost;
-                    double leftCell = table.GetCellValue(i - 1, j) + InsertDeleteCost;
-                    double diagCell = table.GetCellValue(i - 1, j - 1) + diff(table.X[i - 1], table.Y[j - 1]);
+                    double topCell = table.GetCell(j, -1) + InsertDeleteCost;
+                    double leftCell = table.GetCell(j - 1) + InsertDeleteCost;
+                    double diagCell = table.GetCell(j - 1, -1) + diff(table.X[j - 1], table.Y[i - 1]);
 
                     double min = Math.Min(topCell, Math.Min(diagCell, leftCell));
 
-                    if(min == topCell)
-                        table.SetCell(i, j, topCell, table.GetCell(i, j - 1), "insert");
-                    else if (min == leftCell)
-                        table.SetCell(i, j, leftCell, table.GetCell(i - 1, j), "insert");
-                    else if (min == diagCell)
-                    {
-                        string type;
-
-                        if (table.X[i - 1] == table.Y[j - 1])
-                            type = "match";
-                        else
-                            type = "substitution";
-
-                        table.SetCell(i, j, diagCell, table.GetCell(i - 1, j - 1), type);
-                    }
+                    table.SetCell(j, min);
                 }
+
+                table.currentRow++;
+                table.SwapArrays();
             }
 
-            return (int)table.GetCellValue(table.width - 1, table.height - 1);
+            return table.GetFinal();
         }
 
         public int diff(char letterA, char letterB)

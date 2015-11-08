@@ -86,7 +86,7 @@ namespace GeneticsLab
             {
                 for (int y = 0; y < NUMBER_OF_SEQUENCES; ++y)
                 {
-                    if(x <= y)
+                    if(x < y)
                         m_resultTable.SetCell(x, y, processor.Align(m_sequences[x], m_sequences[y],m_resultTable,x,y));
                 }
             }

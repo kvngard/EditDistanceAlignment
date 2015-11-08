@@ -7,14 +7,14 @@ namespace GeneticsLab
 {
     class dpTable
     {
-        node[,] results = null;
+        double[,] results = null;
 
         public int width = 0;
         public int height = 0;
         public string X = "";
         public string Y = "";
         private int InsertDeleteCost = 5;
-        private int MaxCharactersToAlign = 5000;
+        private int MaxCharactersToAlign = 5001;
 
         public dpTable(GeneSequence aSequence, GeneSequence bSequence)
         {
@@ -23,46 +23,38 @@ namespace GeneticsLab
 
             setDimensions();
 
-            results = new node[width, height];
+            results = new double[width, height];
 
-            this.SetCell(0, 0, -3, null, "start");
+            this.SetCell(0, 0, 0);
 
             for (int i = 1; i < width; ++i)
-                this.SetCell(i, 0, InsertDeleteCost * i, GetCell(i - 1, 0), "insert");
+                this.SetCell(i, 0, InsertDeleteCost * i);
 
             for (int j = 1; j < height; ++j)
-                this.SetCell(0, j, InsertDeleteCost * j, GetCell(0, j - 1), "insert");
+                this.SetCell(0, j, InsertDeleteCost * j);
         }
 
         private void setDimensions()
         {
             if (X.Length < MaxCharactersToAlign)
-                width = X.Length;
+                width = X.Length + 1;
             else
                 width = MaxCharactersToAlign;
 
             if (Y.Length < MaxCharactersToAlign)
-                height = Y.Length;
+                height = Y.Length + 1;
             else
                 height = MaxCharactersToAlign;
         }
 
-        public void SetCell(int x, int y, double value, node prev, string type)
+        public void SetCell(int x, int y, double value)
         {
-            if (results[x, y] == null)
-                results[x, y] = new node(value, prev, type);
-            else
-                results[x, y].value = value;
+           results[x, y] = value;
         }
 
-        public double GetCellValue(int x, int y)
+        public double GetCell(int x, int y)
         {
-            return (results[x, y].value);
-        }
-
-        public node GetCell(int x, int y)
-        {
-            return results[x, y];
+            return (results[x, y]);
         }
     }
 }
