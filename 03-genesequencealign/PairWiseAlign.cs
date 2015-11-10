@@ -15,6 +15,18 @@ namespace GeneticsLab
         private int InsertDeleteCost = 5;
         private int CharsMatchCost = -3;
 
+        private int MaxCharactersToAlign = 5001;
+
+        double[] results = null;
+        double[] prev = null;
+
+        public int width = 0;
+        public int height = 0;
+        public string X = "";
+        public string Y = "";
+
+        public int currentRow = 0;
+        
         /// <summary>
         /// this is the function you implement.
         /// </summary>
@@ -25,36 +37,75 @@ namespace GeneticsLab
         /// <param name="columnInTable">this particular alignment will occupy a cell in this column of the result table.</param>
         /// <returns>the alignment score for sequenceA and sequenceB.  The calling function places the result in entry rowInTable,columnInTable
         /// of the ResultTable</returns>
-        public int Align(GeneSequence sequenceA, GeneSequence sequenceB, ResultTable resultTableSoFar, int rowInTable, int columnInTable)
+        public int Score(GeneSequence sequenceA, GeneSequence sequenceB, ResultTable resultTableSoFar, int rowInTable, int columnInTable)
         {
-            dpRows table = new dpRows(sequenceA, sequenceB);
+            initialize(sequenceA, sequenceB);
 
-            for (int i = 1; i < table.height; i++)
+            for (int i = 1; i < height; i++)
             {
-                for (int j = 1; j < table.width; j++)
+                for (int j = 1; j < width; j++)
                 {
-                    double topCell = table.GetCell(j, -1) + InsertDeleteCost;
-                    double leftCell = table.GetCell(j - 1) + InsertDeleteCost;
-                    double diagCell = table.GetCell(j - 1, -1) + diff(table.X[j - 1], table.Y[i - 1]);
+                    int diagCellCost = 0;
+                    if (X[j - 1] == Y[i - 1])
+                        diagCellCost = CharsMatchCost;
+                    else
+                        diagCellCost = SubstitutionCost;
+
+                    double topCell = prev[j] + InsertDeleteCost;
+                    double leftCell = results[j - 1] + InsertDeleteCost;
+                    double diagCell = prev[j - 1] + diagCellCost;
 
                     double min = Math.Min(topCell, Math.Min(diagCell, leftCell));
 
-                    table.SetCell(j, min);
+                    results[j] = min;
                 }
 
-                table.currentRow++;
-                table.SwapArrays();
+                currentRow++;
+                SwapArrays();
             }
 
-            return table.GetFinal();
+            return (int)prev[width - 1];
         }
 
-        public int diff(char letterA, char letterB)
+        public void initialize(GeneSequence aSequence, GeneSequence bSequence)
         {
-            if (letterA == letterB)
-                return CharsMatchCost;
+            X = aSequence.Sequence;
+            Y = bSequence.Sequence;
+
+            setDimensions();
+
+            prev = new double[width];
+            results = new double[width];
+
+            for (int i = 1; i < width; ++i)
+                results[i] = InsertDeleteCost * i;
+
+            currentRow++;
+            SwapArrays();
+        }
+
+        private void setDimensions()
+        {
+            if (X.Length < MaxCharactersToAlign)
+                width = X.Length + 1;
             else
-                return SubstitutionCost;
+                width = MaxCharactersToAlign;
+
+            if (Y.Length < MaxCharactersToAlign)
+                height = Y.Length + 1;
+            else
+                height = MaxCharactersToAlign;
+        }
+
+        public void SwapArrays()
+        {
+            double[] temp = null;
+
+            temp = prev;
+            prev = results;
+            results = temp;
+
+            results[0] = InsertDeleteCost * currentRow;
         }
     }
 }

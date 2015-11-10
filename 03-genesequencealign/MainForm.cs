@@ -87,9 +87,19 @@ namespace GeneticsLab
                 for (int y = 0; y < NUMBER_OF_SEQUENCES; ++y)
                 {
                     if(x < y)
-                        m_resultTable.SetCell(x, y, processor.Align(m_sequences[x], m_sequences[y],m_resultTable,x,y));
+                        m_resultTable.SetCell(x, y, processor.Score(m_sequences[x], m_sequences[y],m_resultTable,x,y));
                 }
             }
+        }
+
+        private void alignStrings(int row, int col)
+        {
+            PairWiseAlign processor = new PairWiseAlign();
+            dpTable table = new dpTable(m_sequences[row], m_sequences[col]);
+
+            string[] alignments = table.Align();
+            alignBoxA.Text = alignments[0];
+            alignBoxB.Text = alignments[1];
         }
 
         private void processButton_Click(object sender, EventArgs e)
@@ -101,6 +111,13 @@ namespace GeneticsLab
             timer.Stop();
             statusMessage.Text = "Done.  Time taken: " + timer.Elapsed;
 
+        }
+
+        private void CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            int row = e.RowIndex;
+            int col = e.ColumnIndex;
+            alignStrings(row, col);
         }
     }
 }

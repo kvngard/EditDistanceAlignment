@@ -66,12 +66,11 @@ namespace GeneticsLab
            results[x] = value;
         }
 
-        public double GetCell(int x, int? y = null)
+        public double GetCell(int x, int y)
         {
-            if (y == null)
+            if (y == 0)
                 return results[x];
-            else
-                return prev[x];
+            return prev[x];
         }
 
         public int GetFinal() 
